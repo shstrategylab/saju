@@ -476,9 +476,21 @@ function renderComplete(data) {
   const box = document.getElementById('summaryBox');
   const info = data.basicInfo;
   const contact = data.contact;
+  const memoirCount = Object.keys(data.memoir || {}).length;
   box.innerHTML = `
     <div class="srow"><span class="k">이름</span><span class="v">${info.name}</span></div>
     <div class="srow"><span class="k">생년월일</span><span class="v">${info.birthDate} (${info.calendarType})</span></div>
     <div class="srow"><span class="k">성별 / 나이</span><span class="v">${info.gender} / 만 ${info.currentAge}세</span></div>
+    <div class="srow"><span class="k">출생 시간</span><span class="v">${info.birthTime}</span></div>
     <div class="srow"><span class="k">이메일</span><span class="v">${contact.email || '—'}</span></div>
-    <div class="sro
+    <div class="srow"><span class="k">휴대폰</span><span class="v">${contact.phone || '—'}</span></div>
+    <div class="srow"><span class="k">회고록 입력</span><span class="v">${memoirCount}개 시대</span></div>
+  \`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initDecades();
+});
+</script>
+</body>
+</html>
