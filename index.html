@@ -337,7 +337,26 @@
         </div>
         <div class="fg">
           <label>출생 시간 <span style="font-weight:400;">(모르면 비워두세요)</span></label>
-          <input type="time" id="f_time" />
+          <div style="display:flex; gap:6px; align-items:center;">
+            <select id="f_ampm" style="width:80px; flex-shrink:0;" onchange="updateTime()">
+              <option value="">-</option>
+              <option value="오전">오전</option>
+              <option value="오후">오후</option>
+            </select>
+            <select id="f_hour" style="flex:1;" onchange="updateTime()">
+              <option value="">시</option>
+              <option value="1">1시</option><option value="2">2시</option><option value="3">3시</option>
+              <option value="4">4시</option><option value="5">5시</option><option value="6">6시</option>
+              <option value="7">7시</option><option value="8">8시</option><option value="9">9시</option>
+              <option value="10">10시</option><option value="11">11시</option><option value="12">12시</option>
+            </select>
+            <select id="f_min" style="flex:1;" onchange="updateTime()">
+              <option value="">분</option>
+              <option value="00">00분</option><option value="10">10분</option><option value="20">20분</option>
+              <option value="30">30분</option><option value="40">40분</option><option value="50">50분</option>
+            </select>
+          </div>
+          <input type="hidden" id="f_time" />
         </div>
         <div class="fg">
           <label>음력 / 양력</label>
@@ -432,7 +451,7 @@
           · 보고서는 입력하신 연락처(이메일 또는 문자)로 발송됩니다.<br>
           · 추가 확인이 필요한 경우 연락드릴 수 있습니다.<br>
           · 출생 시간이 불명확하면 분석 범위가 달라질 수 있습니다.<br>
-          · 문의: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="cebda6bdbabcafbaaba9b7a2afac8ea9a3afa7a2e0ada1a3">[email&#160;protected]</a><a href="/cdn-cgi/l/email-protection#c9aaa6a7bda8aabd89baa8a3bce4baacbbbfa0aaace7aaa6a4"><span class="__cf_email__" data-cfemail="55363a3b213436211526343f2078263027233c36307b363a38">[email&#160;protected]</span></a>
+          · 문의: <a href="mailto:shstrategylab@gmail.com">shstrategylab@gmail.com</a>
         </div>
       </div>
     </div>
@@ -620,6 +639,17 @@ function renderComplete(data) {
   html += '<div class="srow"><span class="k">휴대폰</span><span class="v">' + (contact.phone || '—') + '</span></div>';
   html += '<div class="srow"><span class="k">회고록 작성</span><span class="v">' + memoirCount + '개 시대</span></div>';
   box.innerHTML = html;
+}
+
+function updateTime() {
+  var ampm = document.getElementById('f_ampm').value;
+  var hour = document.getElementById('f_hour').value;
+  var min = document.getElementById('f_min').value;
+  if (ampm && hour) {
+    document.getElementById('f_time').value = ampm + ' ' + hour + '시' + (min ? ' ' + min + '분' : '');
+  } else {
+    document.getElementById('f_time').value = '';
+  }
 }
 
 initDecades();-e 
