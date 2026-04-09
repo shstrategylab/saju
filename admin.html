@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>사주풀이 운영자 관리</title>
 
+<!-- ✅ Firestore → Realtime Database SDK로 교체 -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -152,21 +153,21 @@
 </div>
 
 <script>
-// ============================================================
-// ★ Firebase 설정 - index.html과 동일하게 입력하세요
-// ============================================================
+// ✅ 실제 Firebase 설정값 적용 + Realtime Database 사용
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDLW8NprRPEkKtokJv3syH6P6JKHFEXOhk",
+  authDomain: "saju-service-2b228.firebaseapp.com",
+  databaseURL: "https://saju-service-2b228-default-rtdb.firebaseio.com",
+  projectId: "saju-service-2b228",
+  storageBucket: "saju-service-2b228.firebasestorage.app",
+  messagingSenderId: "917303939890",
+  appId: "1:917303939890:web:32ab13bf12fd3b1feabd2b",
+  measurementId: "G-V85NGWTC2P"
 };
-// ============================================================
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+// ✅ firestore() → database() 로 교체
+const db = firebase.database();
 
 let allApps = [];
 let currentFilter = '전체';
@@ -175,8 +176,20 @@ let selectedId = null;
 async function loadApplications() {
   document.getElementById('appList').innerHTML = '<div class="loading">불러오는 중...</div>';
   try {
-    const snap = await db.collection('saju_applications').orderBy('meta.submittedAt', 'desc').get();
-    allApps = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // ✅ Realtime Database 방식: ref().get() 사용
+    const snap = await db.ref('saju_applications').get();
+    if (!snap.exists()) {
+      allApps = [];
+    } else {
+      const raw = snap.val();
+      // key를 id 필드로 추가, 최신순 정렬
+      allApps = Object.entries(raw).map(([key, val]) => ({ id: key, ...val }));
+      allApps.sort((a, b) => {
+        const ta = a.meta?.submittedAt || '';
+        const tb = b.meta?.submittedAt || '';
+        return tb.localeCompare(ta);
+      });
+    }
     renderList();
   } catch (e) {
     document.getElementById('appList').innerHTML = `<div class="loading" style="color:#dc2626;">오류: ${e.message}</div>`;
@@ -318,7 +331,8 @@ function escHtml(str) {
 
 async function updateStatus(id, status) {
   try {
-    await db.collection('saju_applications').doc(id).update({ 'meta.status': status });
+    // ✅ Realtime Database 방식
+    await db.ref(`saju_applications/${id}/meta/status`).set(status);
     const app = allApps.find(a => a.id === id);
     if (app) { app.meta.status = status; renderList(); }
   } catch(e) { alert('상태 변경 실패: ' + e.message); }
@@ -327,7 +341,8 @@ async function updateStatus(id, status) {
 async function saveMemo(id) {
   const memo = document.getElementById(`memo_${id}`)?.value || '';
   try {
-    await db.collection('saju_applications').doc(id).update({ adminMemo: memo });
+    // ✅ Realtime Database 방식
+    await db.ref(`saju_applications/${id}/adminMemo`).set(memo);
     const app = allApps.find(a => a.id === id);
     if (app) app.adminMemo = memo;
     alert('메모가 저장되었습니다.');
@@ -358,7 +373,8 @@ function downloadAllJson() {
 async function deleteApp(id) {
   if (!confirm('이 접수 건을 삭제하시겠습니까? 복구할 수 없습니다.')) return;
   try {
-    await db.collection('saju_applications').doc(id).delete();
+    // ✅ Realtime Database 방식
+    await db.ref(`saju_applications/${id}`).remove();
     allApps = allApps.filter(a => a.id !== id);
     selectedId = null;
     renderList();
