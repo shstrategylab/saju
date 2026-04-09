@@ -309,10 +309,7 @@
 
 </div><!-- /wrap -->
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-// ============================================================
-// ★ Firebase 설정 - 본인의 Firebase 프로젝트 설정으로 교체하세요
-// ============================================================
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyDLW8NprRPEkKtokJv3syH6P6JKHFEXOhk",
   authDomain: "saju-service-2b228.firebaseapp.com",
@@ -323,12 +320,10 @@ const firebaseConfig = {
   appId: "1:917303939890:web:32ab13bf12fd3b1feabd2b",
   measurementId: "G-V85NGWTC2P"
 };
-// ============================================================
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 시대별 탭 설정
 const decades = [
   { label: "10대", hint: "예) 15살 겨울, 아버지 별세 / 18살, 고등학교 졸업 후 상경 / 19살, 첫 취업" },
   { label: "20대", hint: "예) 25살, 결혼 / 27살, 이혼 / 29살, 사업 시작 / 23살, 교통사고" },
@@ -344,69 +339,71 @@ let currentStep = 1;
 function initDecades() {
   const tabsEl = document.getElementById('dtabs');
   const panelsEl = document.getElementById('dpanels');
-  decades.forEach((d, i) => {
+  decades.forEach(function(d, i) {
     const tab = document.createElement('div');
     tab.className = 'dtab' + (i === 0 ? ' active' : '');
     tab.textContent = d.label;
-    tab.id = `dt_${i}`;
-    tab.onclick = () => switchDecade(i);
+    tab.id = 'dt_' + i;
+    tab.onclick = function() { switchDecade(i); };
     tabsEl.appendChild(tab);
 
     const panel = document.createElement('div');
     panel.className = 'dpanel' + (i === 0 ? ' active' : '');
-    panel.innerHTML = `
-      <div class="dhint">${d.hint}</div>
-      <div class="fg">
-        <textarea id="dc_${i}" placeholder="나이와 함께 자유롭게 적어주세요. 좋은 일, 나쁜 일 모두 괜찮습니다." style="min-height:140px;" oninput="markTab(${i})"></textarea>
-      </div>`;
+    panel.innerHTML =
+      '<div class="dhint">' + d.hint + '</div>' +
+      '<div class="fg">' +
+      '<textarea id="dc_' + i + '" placeholder="나이와 함께 자유롭게 적어주세요. 좋은 일, 나쁜 일 모두 괜찮습니다." style="min-height:140px;" oninput="markTab(' + i + ')"></textarea>' +
+      '</div>';
     panelsEl.appendChild(panel);
   });
 }
 
 function switchDecade(idx) {
-  document.querySelectorAll('.dtab').forEach((t, i) => t.classList.toggle('active', i === idx));
-  document.querySelectorAll('.dpanel').forEach((p, i) => p.classList.toggle('active', i === idx));
+  document.querySelectorAll('.dtab').forEach(function(t, i) { t.classList.toggle('active', i === idx); });
+  document.querySelectorAll('.dpanel').forEach(function(p, i) { p.classList.toggle('active', i === idx); });
 }
 
 function markTab(idx) {
-  const val = document.getElementById(`dc_${idx}`)?.value?.trim();
-  const tab = document.getElementById(`dt_${idx}`);
+  var val = document.getElementById('dc_' + idx);
+  if (!val) return;
+  val = val.value.trim();
+  var tab = document.getElementById('dt_' + idx);
   if (val) tab.classList.add('filled');
   else tab.classList.remove('filled');
 }
 
 function goStep(n) {
-  document.getElementById(`panel${currentStep}`).classList.remove('active');
-  document.getElementById(`pc${currentStep}`).classList.remove('active');
-  document.getElementById(`pc${currentStep}`).classList.add('done');
+  document.getElementById('panel' + currentStep).classList.remove('active');
+  document.getElementById('pc' + currentStep).classList.remove('active');
+  document.getElementById('pc' + currentStep).classList.add('done');
   currentStep = n;
-  document.getElementById(`panel${n}`).classList.add('active');
-  document.querySelectorAll('.prog-circle').forEach((c, i) => {
+  document.getElementById('panel' + n).classList.add('active');
+  document.querySelectorAll('.prog-circle').forEach(function(c, i) {
     if (i + 1 === n) { c.classList.remove('done'); c.classList.add('active'); }
   });
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function validateStep1() {
-  let ok = true;
+  var ok = true;
   function check(id, errId, fn) {
-    const el = document.getElementById(id);
-    const err = document.getElementById(errId);
+    var el = document.getElementById(id);
+    var err = document.getElementById(errId);
     if (!fn(el.value)) {
       el.classList.add('err'); err.classList.add('show'); ok = false;
     } else {
       el.classList.remove('err'); err.classList.remove('show');
     }
   }
-  check('f_name', 'e_name', v => v.trim() !== '');
-  check('f_gender', 'e_gender', v => v !== '');
-  check('f_birth', 'e_birth', v => v !== '');
-  check('f_age', 'e_age', v => v !== '' && Number(v) > 0);
+  check('f_name', 'e_name', function(v) { return v.trim() !== ''; });
+  check('f_gender', 'e_gender', function(v) { return v !== ''; });
+  check('f_birth', 'e_birth', function(v) { return v !== ''; });
+  check('f_age', 'e_age', function(v) { return v !== '' && Number(v) > 0; });
 
-  const email = document.getElementById('f_email').value.trim();
-  const phone = document.getElementById('f_phone').value.trim();
-  const eContact = document.getElementById('e_contact');
-  const emailEl = document.getElementById('f_email');
+  var email = document.getElementById('f_email').value.trim();
+  var phone = document.getElementById('f_phone').value.trim();
+  var eContact = document.getElementById('e_contact');
+  var emailEl = document.getElementById('f_email');
   if (!email && !phone) {
     emailEl.classList.add('err'); eContact.classList.add('show'); ok = false;
   } else {
@@ -417,13 +414,14 @@ function validateStep1() {
 }
 
 function collectData() {
-  const decadeData = {};
-  decades.forEach((d, i) => {
-    const val = document.getElementById(`dc_${i}`)?.value?.trim() || '';
+  var decadeData = {};
+  decades.forEach(function(d, i) {
+    var el = document.getElementById('dc_' + i);
+    var val = el ? el.value.trim() : '';
     if (val) decadeData[d.label] = val;
   });
 
-  const now = new Date();
+  var now = new Date();
   return {
     meta: {
       submittedAt: now.toISOString(),
@@ -452,14 +450,13 @@ function collectData() {
 }
 
 async function submitForm() {
-  const btn = document.getElementById('submitBtn');
+  var btn = document.getElementById('submitBtn');
   btn.disabled = true;
   document.getElementById('overlay').classList.add('show');
 
   try {
-    const data = collectData();
-    // Firestore에 저장
-    const docRef = await db.collection('saju_applications').add(data);
+    var data = collectData();
+    var docRef = await db.collection('saju_applications').add(data);
     data.meta.docId = docRef.id;
 
     document.getElementById('overlay').classList.remove('show');
@@ -473,22 +470,22 @@ async function submitForm() {
 }
 
 function renderComplete(data) {
-  const box = document.getElementById('summaryBox');
-  const info = data.basicInfo;
-  const contact = data.contact;
-  const memoirCount = Object.keys(data.memoir || {}).length;
-  box.innerHTML = `
-    <div class="srow"><span class="k">이름</span><span class="v">${info.name}</span></div>
-    <div class="srow"><span class="k">생년월일</span><span class="v">${info.birthDate} (${info.calendarType})</span></div>
-    <div class="srow"><span class="k">성별 / 나이</span><span class="v">${info.gender} / 만 ${info.currentAge}세</span></div>
-    <div class="srow"><span class="k">출생 시간</span><span class="v">${info.birthTime}</span></div>
-    <div class="srow"><span class="k">이메일</span><span class="v">${contact.email || '—'}</span></div>
-    <div class="srow"><span class="k">휴대폰</span><span class="v">${contact.phone || '—'}</span></div>
-    <div class="srow"><span class="k">회고록 입력</span><span class="v">${memoirCount}개 시대</span></div>
-  \`;
+  var box = document.getElementById('summaryBox');
+  var info = data.basicInfo;
+  var contact = data.contact;
+  var memoirCount = Object.keys(data.memoir || {}).length;
+  var html = '';
+  html += '<div class="srow"><span class="k">이름</span><span class="v">' + info.name + '</span></div>';
+  html += '<div class="srow"><span class="k">생년월일</span><span class="v">' + info.birthDate + ' (' + info.calendarType + ')</span></div>';
+  html += '<div class="srow"><span class="k">성별 / 나이</span><span class="v">' + info.gender + ' / 만 ' + info.currentAge + '세</span></div>';
+  html += '<div class="srow"><span class="k">출생 시간</span><span class="v">' + info.birthTime + '</span></div>';
+  html += '<div class="srow"><span class="k">이메일</span><span class="v">' + (contact.email || '—') + '</span></div>';
+  html += '<div class="srow"><span class="k">휴대폰</span><span class="v">' + (contact.phone || '—') + '</span></div>';
+  html += '<div class="srow"><span class="k">회고록 입력</span><span class="v">' + memoirCount + '개 시대</span></div>';
+  box.innerHTML = html;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
   initDecades();
 });
 </script>
